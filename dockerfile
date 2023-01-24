@@ -1,8 +1,8 @@
-FROM python:3
+FROM python:3.8
 
 RUN apt-get update && apt-get -y install cron vim tzdata
 
-RUN apt-get --assume-yes install freetds-dev freetds-bin 
+RUN apt-get --assume-yes install freetds-dev freetds-bin
 
 RUN apt-get --assume-yes install python-dev
 
