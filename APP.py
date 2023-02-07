@@ -52,13 +52,19 @@ loan_selector = st.selectbox('Select Loan Id',list_loans)
 
 
 
-sql2  = """ SELECT [Action],[Notes 3rd Party],[Notes Internal], MAX([REPORT DATE]) AS _MAX  FROM [STG_MR].[MERGED] WHERE [Unique Loan Id] = """ + str(loan_selector) + """ GROUP BY [Action],[Notes 3rd Party],[Notes Internal] ORDER BY _MAX DESC """
+sql2  = """
+    SELECT [Action],[Notes 3rd Party],[Notes Internal],[RESOLUTION], MAX([REPORT DATE]) AS _MAX  
+    FROM [STG_MR].[MERGED] WHERE [Unique Loan Id] = """ + str(loan_selector) + """ 
+    GROUP BY [Action],[Notes 3rd Party],[Notes Internal],[RESOLUTION] ORDER BY _MAX DESC """
+
+
 sql2_df = pd.read_sql(con=engine,sql = sql2)
 
 
 action = sql2_df.iloc[0,0]
 Notes_3rd = sql2_df.iloc[0,1]
 notes_internal = sql2_df.iloc[0,2]
+resolution = sql2_df.iloc[0,3]
 
 if action == emp_str:
     action = ''
@@ -81,6 +87,9 @@ nostes3rd_ = st.text_input(value = Notes_3rd,label='Notes 3rd Party',label_visib
 title_centered_h4('Notes Internal')
 notes_internal_ = st.text_input(value = notes_internal,label='Notes Internal',label_visibility ='hidden')
 
+title_centered_h4('Resolution')
+Resolution_ = st.text_input(value = str(resolution),label='Resolution',label_visibility ='hidden')
+
 d1,d2,d3,d4,d5 =st.columns(5)
 
 
@@ -89,7 +98,7 @@ with d3:
         cursor.execute("""
         UPDATE [STG_MR].[MERGED]  
         SET 
-            [Action] = """ + """'""" + str(actions_) + """'""" + ""","""+ """ [Notes Internal] = '""" +  str(notes_internal_) + """'""" + """,[Notes 3rd Party] = """  + """'""" + str(nostes3rd_) + """'""" + """ WHERE [Unique Loan Id] = """ +str(loan_selector) + """ AND [REPORT DATE]  = """ + """'""" + str(sql2_df.iloc[0,3])[0:23] + """'""")
+            [Action] = """ + """'""" + str(actions_) + """'""" + ""","""+ """ [Notes Internal] = '""" +  str(notes_internal_) + """'""" + """,[Notes 3rd Party] = """  + """'""" + str(nostes3rd_) + """'""" + """,[RESOLUTION] = '"""+ str(Resolution_)+ """'""" + """ WHERE [Unique Loan Id] = """ +str(loan_selector) + """ AND [REPORT DATE]  = """ + """'""" + str(sql2_df.iloc[0,4])[0:23] + """'""")
         conn.commit()
         conn.close()
         st.write("Updated")
